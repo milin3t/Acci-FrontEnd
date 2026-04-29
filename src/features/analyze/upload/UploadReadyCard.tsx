@@ -1,12 +1,12 @@
 import { UploadCardHeader } from "@/features/analyze/upload/UploadCardHeader";
-import Link from "next/link";
 
 type UploadReadyCardProps = {
   onCancel: () => void;
+  onAnalyze: () => void;
   previewUrl?: string | null;
 };
 
-export function UploadReadyCard({ onCancel, previewUrl }: UploadReadyCardProps) {
+export function UploadReadyCard({ onCancel, onAnalyze, previewUrl }: UploadReadyCardProps) {
   return (
     <div className="w-full max-w-xl rounded-2xl bg-white p-4 md:p-6">
       <UploadCardHeader title="영상 업로드" onCancel={onCancel} />
@@ -17,9 +17,13 @@ export function UploadReadyCard({ onCancel, previewUrl }: UploadReadyCardProps) 
           <div className="aspect-3/2 md:aspect-auto md:h-72" aria-label="업로드된 영상 미리보기" />
         )}
       </div>
-      <Link href="/analyze/loading" className="mt-6 hidden w-full rounded-lg bg-gray-900 py-4 text-body7 text-white md:block md:text-body5 text-center">
+      <button
+        type="button"
+        onClick={onAnalyze}
+        className="mt-6 hidden w-full rounded-lg bg-gray-900 py-4 text-body7 text-white md:block md:text-body5"
+      >
         AI 분석하기
-      </Link>
+      </button>
     </div>
   );
 }

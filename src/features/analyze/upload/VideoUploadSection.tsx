@@ -6,18 +6,20 @@ import { UploadLoading } from "@/features/analyze/upload/UploadLoading";
 import { UploadReadyCard } from "@/features/analyze/upload/UploadReadyCard";
 import { VideoUploadCard } from "@/features/analyze/upload/VideoUploadCard";
 import type React from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 type UploadState = "idle" | "uploading" | "ready";
 
 export function VideoUploadSection() {
+  const router = useRouter();
   const [uploadState, setUploadState] = useState<UploadState>("idle");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [analysisId, setAnalysisId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const uploadAbortRef = useRef<AbortController | null>(null);
 
@@ -28,6 +30,7 @@ export function VideoUploadSection() {
     setUploadProgress(0);
     setUploadError(null);
     setSelectedFileName(null);
+    setAnalysisId(null);
     setPreviewUrl((currentUrl) => {
       if (currentUrl) {
         URL.revokeObjectURL(currentUrl);
@@ -89,9 +92,9 @@ export function VideoUploadSection() {
       });
 
       console.log("[Upload] response:", response);
+      setAnalysisId(response.analysisId);
       setUploadProgress(100);
       setUploadState("ready");
-      // TODO [Minjun]: 분석 시작 단계에서 response.analysisId를 활용해 결과 조회 라우팅 필요
     } catch (error) {
       if ((error as { code?: string }).code === "ERR_CANCELED") {
         return;
@@ -99,6 +102,15 @@ export function VideoUploadSection() {
       setUploadError("업로드에 실패했습니다. 다시 시도해주세요.");
       setUploadState("idle");
     }
+  };
+
+  const handleAnalyzeStart = () => {
+    if (!analysisId) {
+      setUploadError("분석 식별자를 찾을 수 없습니다. 다시 업로드해주세요.");
+      return;
+    }
+    setUploadError(null);
+    router.push(`/analyze/loading?analysisId=${analysisId}`);
   };
 
   useEffect(() => {
@@ -112,13 +124,15 @@ export function VideoUploadSection() {
   return (
     <div className="flex w-full flex-col items-center gap-4 md:gap-6">
       {uploadState === "uploading" && <UploadLoading progress={uploadProgress} onCancel={handleCancelRequest} />}
-      {uploadState === "ready" && <UploadReadyCard onCancel={handleCancelRequest} previewUrl={previewUrl} />}
+      {uploadState === "ready" && (
+        <UploadReadyCard onCancel={handleCancelRequest} onAnalyze={handleAnalyzeStart} previewUrl={previewUrl} />
+      )}
       {uploadState === "idle" && <VideoUploadCard onFileChange={handleFileChange} fileInputRef={fileInputRef} errorMessage={uploadError} />}
       {uploadState === "ready" && (
         <div className="w-full max-w-xl md:hidden">
-          <Link href="/analyze/loading" className="block w-full rounded-lg bg-gray-900 py-3 text-body7 text-white text-center">
+          <button type="button" onClick={handleAnalyzeStart} className="block w-full rounded-lg bg-gray-900 py-3 text-body7 text-white text-center">
             AI 분석하기
-          </Link>
+          </button>
         </div>
       )}
       <UploadCancelModal
