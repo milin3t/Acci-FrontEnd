@@ -5,7 +5,6 @@ import { UploadCancelModal } from "@/features/analyze/upload/UploadCancelModal";
 import { UploadLoading } from "@/features/analyze/upload/UploadLoading";
 import { UploadReadyCard } from "@/features/analyze/upload/UploadReadyCard";
 import { VideoUploadCard } from "@/features/analyze/upload/VideoUploadCard";
-import type React from "react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -20,7 +19,6 @@ export function VideoUploadSection() {
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [analysisId, setAnalysisId] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const uploadAbortRef = useRef<AbortController | null>(null);
 
   const resetUpload = () => {
@@ -37,9 +35,6 @@ export function VideoUploadSection() {
       }
       return null;
     });
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
   };
 
   const handleCancelRequest = () => {
@@ -55,19 +50,18 @@ export function VideoUploadSection() {
     resetUpload();
   };
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) {
-      return;
-    }
+  const handleFileSelect = async (file: File) => {
     const allowedExtensions = [".mp4", ".avi"];
+    const maxFileSize = 100 * 1024 * 1024;
+    const minFileSize = 1 * 1024 * 1024;
     const lowerName = file.name.toLowerCase();
     const hasAllowedExtension = allowedExtensions.some((ext) => lowerName.endsWith(ext));
     if (!hasAllowedExtension) {
       setUploadError("MP4 또는 AVI 파일만 업로드할 수 있어요.");
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+      return;
+    }
+    if (file.size < minFileSize || file.size > maxFileSize) {
+      setUploadError("영상 용량은 1MB 이상 100MB 이하만 업로드할 수 있어요.");
       return;
     }
     setUploadError(null);
@@ -113,6 +107,10 @@ export function VideoUploadSection() {
     router.push(`/analyze/loading?analysisId=${analysisId}`);
   };
 
+  const handleDropError = (message: string) => {
+    setUploadError(message);
+  };
+
   useEffect(() => {
     return () => {
       if (previewUrl) {
@@ -127,7 +125,9 @@ export function VideoUploadSection() {
       {uploadState === "ready" && (
         <UploadReadyCard onCancel={handleCancelRequest} onAnalyze={handleAnalyzeStart} previewUrl={previewUrl} />
       )}
-      {uploadState === "idle" && <VideoUploadCard onFileChange={handleFileChange} fileInputRef={fileInputRef} errorMessage={uploadError} />}
+      {uploadState === "idle" && (
+        <VideoUploadCard onFileSelect={handleFileSelect} onDropError={handleDropError} errorMessage={uploadError} />
+      )}
       {uploadState === "ready" && (
         <div className="w-full max-w-xl md:hidden">
           <button type="button" onClick={handleAnalyzeStart} className="block w-full rounded-lg bg-gray-900 py-3 text-body7 text-white text-center">
