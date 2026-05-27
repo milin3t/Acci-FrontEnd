@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { VEHICLES, type Brand } from "@/entities/vehicle";
 
 export type RepairRecordItem = {
   id: string;
@@ -6,6 +7,8 @@ export type RepairRecordItem = {
   date: string;
   detail: string;
   href: string;
+  brand?: Brand;
+  logoSrc?: string;
 };
 export type RepairRecordPage = {
   items: RepairRecordItem[];
@@ -32,6 +35,31 @@ type RepairHistoryResponse = {
 };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+const BRAND_LOGO_SRC_BY_BRAND: Record<Brand, string> = {
+  hyundai: "/images/brand-logos/hyundai.svg",
+  kia: "/images/brand-logos/kia.svg",
+  genesis: "/images/brand-logos/genesis.svg",
+};
+
+const VEHICLE_MODEL_TO_BRAND = new Map(VEHICLES.map((vehicle) => [normalizeVehicleModel(vehicle.model), vehicle.brand]));
+
+function normalizeVehicleModel(model: string) {
+  return model.trim().toLowerCase();
+}
+
+function getBrandByVehicleModel(vehicleModel?: string): Brand | undefined {
+  if (!vehicleModel) {
+    return undefined;
+  }
+  return VEHICLE_MODEL_TO_BRAND.get(normalizeVehicleModel(vehicleModel));
+}
+
+function getBrandLogoSrc(brand?: Brand): string | undefined {
+  if (!brand) {
+    return undefined;
+  }
+  return BRAND_LOGO_SRC_BY_BRAND[brand];
+}
 
 function formatDate(dateValue?: string) {
   if (!dateValue) {
@@ -93,12 +121,16 @@ export async function getRepairRecordPage(page = 0, size = 5): Promise<RepairRec
     const items = data.content.map((item, index) => {
       const estimateId = item.estimateId ?? item.id ?? String(index);
       const detail = formatCurrency(item.totalEstimate) ?? item.damageSummary ?? mapStatusToDetail(item.status);
+      const brand = getBrandByVehicleModel(item.vehicleModel);
+
       return {
         id: estimateId,
         title: item.vehicleModel ?? "수리비 견적 기록",
         date: formatDate(item.createdAt),
         detail,
         href: `/repair-estimate/result/${estimateId}`,
+        brand,
+        logoSrc: getBrandLogoSrc(brand),
       };
     });
     return {

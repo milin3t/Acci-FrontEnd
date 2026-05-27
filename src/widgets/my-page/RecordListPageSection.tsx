@@ -8,6 +8,7 @@ type RecordItem = {
   date: string;
   detail: string;
   href?: string;
+  logoSrc?: string;
 };
 
 type RecordListPageSectionProps = {
@@ -26,7 +27,7 @@ export function RecordListPageSection({ title, items, currentPage, totalPages, b
         <div className="mt-4 space-y-4">
           {/* TODO [Minjun]: 목록 데이터 API 연동 */}
           {items.map((item) => (
-            <RecordListItem key={item.id} title={item.title} date={item.date} detail={item.detail} href={item.href} />
+            <RecordListItem key={item.id} title={item.title} date={item.date} detail={item.detail} href={item.href} logoSrc={item.logoSrc} />
           ))}
         </div>
         <div className="mt-6">

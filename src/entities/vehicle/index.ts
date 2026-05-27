@@ -8,5 +8,6 @@ export {
   normalizeVehicleType,
   PART_ID_TO_MESH_NAME,
   getPartMeshName,
+  type Brand,
   type VehicleInfo,
 } from "./vehicles";
