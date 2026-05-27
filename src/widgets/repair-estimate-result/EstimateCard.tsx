@@ -6,7 +6,8 @@ import { EstimateCompletedState } from "./EstimateCompletedState";
 import { EstimateUnavailableState } from "./EstimateUnavailableState";
 
 interface RepairItem {
-  cost: number;
+  costMin: number;
+  costMax: number;
   partName: string;
   repairMethod: string;
 }
@@ -23,12 +24,13 @@ interface EstimateCardProps {
   status?: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
   brand?: string;
   model?: string;
-  totalEstimate?: number | null;
+  totalEstimateMin?: number | null;
+  totalEstimateMax?: number | null;
   repairItems?: RepairItem[];
   damageDetails?: DamageDetail[];
 }
 
-export function EstimateCard({ isLoading, errorMessage, status, brand = "", model = "", totalEstimate = null, repairItems = [], damageDetails = [] }: EstimateCardProps) {
+export function EstimateCard({ isLoading, errorMessage, status, brand = "", model = "", totalEstimateMin = null, totalEstimateMax = null, repairItems = [], damageDetails = [] }: EstimateCardProps) {
   return (
     <div className="bg-white flex flex-col gap-6 p-6 rounded-2xl w-full max-w-[840px] mx-6">
       {isLoading && <EstimateLoadingState />}
@@ -40,7 +42,7 @@ export function EstimateCard({ isLoading, errorMessage, status, brand = "", mode
       {!isLoading && !errorMessage && status === "FAILED" && <EstimateFailedState />}
 
       {!isLoading && !errorMessage && status === "COMPLETED" && (
-        <EstimateCompletedState brand={brand} model={model} totalEstimate={totalEstimate} repairItems={repairItems} damageDetails={damageDetails} />
+        <EstimateCompletedState brand={brand} model={model} totalEstimateMin={totalEstimateMin} totalEstimateMax={totalEstimateMax} repairItems={repairItems} damageDetails={damageDetails} />
       )}
 
       {!isLoading && !errorMessage && !status && <EstimateUnavailableState />}

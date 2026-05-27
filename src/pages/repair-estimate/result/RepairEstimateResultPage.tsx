@@ -24,12 +24,14 @@ interface RepairEstimateResultResponse {
     partNameEn: string;
   }>;
   repairItems?: Array<{
-    cost: number;
+    costMin: number;
+    costMax: number;
     partName: string;
     repairMethod: string;
   }>;
   status?: RepairEstimateStatus;
-  totalEstimate?: number | null;
+  totalEstimateMin?: number | null;
+  totalEstimateMax?: number | null;
   vehicleInfo: {
     brand: string;
     model: string;
@@ -140,7 +142,8 @@ export default function RepairEstimateResultPage({ id, initialUserInfo = null }:
             status={result?.status}
             brand={result?.vehicleInfo?.brand}
             model={result?.vehicleInfo?.model}
-            totalEstimate={result?.totalEstimate}
+            totalEstimateMin={result?.totalEstimateMin}
+            totalEstimateMax={result?.totalEstimateMax}
             repairItems={result?.repairItems}
             damageDetails={result?.damageDetails}
           />

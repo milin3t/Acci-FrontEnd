@@ -2,7 +2,8 @@ import { useState } from "react";
 import { BRAND_LABELS } from "@/entities/vehicle";
 
 interface RepairItem {
-  cost: number;
+  costMin: number;
+  costMax: number;
   partName: string;
   repairMethod: string;
 }
@@ -16,12 +17,13 @@ interface DamageDetail {
 interface EstimateCompletedStateProps {
   brand: string;
   model: string;
-  totalEstimate: number | null;
+  totalEstimateMin: number | null;
+  totalEstimateMax: number | null;
   repairItems: RepairItem[];
   damageDetails: DamageDetail[];
 }
 
-export function EstimateCompletedState({ brand, model, totalEstimate, repairItems, damageDetails }: EstimateCompletedStateProps) {
+export function EstimateCompletedState({ brand, model, totalEstimateMin, totalEstimateMax, repairItems, damageDetails }: EstimateCompletedStateProps) {
   // 영어 브랜드를 한글로 변환
   const displayBrand = BRAND_LABELS[brand.toLowerCase()] || brand;
   const [openItems, setOpenItems] = useState<Record<number, boolean>>({});
@@ -38,7 +40,12 @@ export function EstimateCompletedState({ brand, model, totalEstimate, repairItem
       {/* 총 수리비 안내 */}
       <div className="flex flex-col items-center justify-center w-full">
         <p className="text-body3 text-gray-500 text-center">
-          {displayBrand} {model}의 예상 수리비는 <span className="text-primary-700">{totalEstimate != null ? `${totalEstimate.toLocaleString()}원` : "NULL"}</span>
+          {displayBrand} {model}의 예상 수리비는{" "}
+          <span className="text-primary-700">
+            {totalEstimateMin != null && totalEstimateMax != null
+              ? `${totalEstimateMin.toLocaleString()}원 ~ ${totalEstimateMax.toLocaleString()}원`
+              : "산출 불가"}
+          </span>
           입니다
         </p>
       </div>
@@ -59,7 +66,11 @@ export function EstimateCompletedState({ brand, model, totalEstimate, repairItem
                   <p className="text-left">{item.partName}</p>
                   <p className="text-center">{damageDetails?.[index]?.damageSeverity ?? "-"}</p>
                   <p className="text-center">{item.repairMethod}</p>
-                  <p className="text-right">{`${item.cost.toLocaleString()}원`}</p>
+                  <p className="text-right">
+                    {item.costMin != null && item.costMax != null
+                      ? `${item.costMin.toLocaleString()}원 ~ ${item.costMax.toLocaleString()}원`
+                      : "-"}
+                  </p>
                 </div>
               ))
             ) : (
@@ -93,7 +104,11 @@ export function EstimateCompletedState({ brand, model, totalEstimate, repairItem
                     </span>
                   </div>
 
-                  <span className="flex items-center gap-2 text-body6 text-gray-900">{`${item.cost.toLocaleString()}원`}</span>
+                  <span className="flex items-center gap-2 text-body6 text-gray-900">
+                    {item.costMin != null && item.costMax != null
+                      ? `${item.costMin.toLocaleString()}원 ~ ${item.costMax.toLocaleString()}원`
+                      : "-"}
+                  </span>
                 </button>
                 {isOpen && (
                   <div className="flex flex-col gap-2 border-t border-gray-100 px-4 py-4 text-body7 text-gray-900">
