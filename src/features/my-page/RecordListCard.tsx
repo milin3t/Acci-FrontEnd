@@ -8,8 +8,11 @@ type RecordItem = {
   title: string;
   date: string;
   detail: string;
+  dotColorClassName?: string;
   href?: string;
   logoSrc?: string;
+  faultRateA?: number;
+  faultRateB?: number;
 };
 
 type RecordListCardProps = {
@@ -36,7 +39,17 @@ export function RecordListCard({ title, items, moreHref, showMore = true }: Reco
       <div className="mt-4 space-y-2 md:space-y-4">
         {/* TODO [Minjun]: 기록 리스트 데이터 API 연동 */}
         {items.map((item) => (
-          <RecordListItem key={item.id} title={item.title} date={item.date} detail={item.detail} href={item.href} logoSrc={item.logoSrc} />
+          <RecordListItem
+            key={item.id}
+            title={item.title}
+            date={item.date}
+            detail={item.detail}
+            dotColorClassName={item.dotColorClassName}
+            href={item.href}
+            logoSrc={item.logoSrc}
+            faultRateA={item.faultRateA}
+            faultRateB={item.faultRateB}
+          />
         ))}
       </div>
     </Card>

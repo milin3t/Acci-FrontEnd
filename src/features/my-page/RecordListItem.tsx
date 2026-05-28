@@ -7,26 +7,46 @@ type RecordListItemProps = {
   dotColorClassName?: string;
   href?: string;
   logoSrc?: string;
+  faultRateA?: number;
+  faultRateB?: number;
 };
 
-export function RecordListItem({ title, date, detail, dotColorClassName = "bg-[#00C853]", href, logoSrc }: RecordListItemProps) {
+export function RecordListItem({ title, date, detail, dotColorClassName = "bg-[#00C853]", href, logoSrc, faultRateA, faultRateB }: RecordListItemProps) {
+  const hasFaultRates = typeof faultRateA === "number" && typeof faultRateB === "number";
+  const chartPercentA = hasFaultRates ? Math.min(Math.max(faultRateA, 0), 100) : 0;
+  const thumbnailClassName = logoSrc ? "bg-black" : hasFaultRates ? "bg-transparent" : "bg-gray-100";
+
   const content = (
     <div className="flex items-center justify-between rounded-lg border border-gray-100 bg-white p-4">
       <div className="flex items-center gap-4">
-        <div
-          className="h-12 w-12 rounded-lg bg-black"
-          aria-hidden="true"
-          style={
-            logoSrc
-              ? {
-                  backgroundImage: `url(${logoSrc})`,
-                  backgroundPosition: "center",
-                  backgroundRepeat: "no-repeat",
-                  backgroundSize: "86% auto",
-                }
-              : undefined
-          }
-        />
+        <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${thumbnailClassName}`} aria-hidden="true">
+          {logoSrc ? (
+            <div
+              className="h-full w-full"
+              style={{
+                backgroundImage: `url(${logoSrc})`,
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                backgroundSize: "86% auto",
+              }}
+            />
+          ) : hasFaultRates ? (
+            <svg className="h-8 w-8 -rotate-90" viewBox="0 0 36 36" aria-hidden="true">
+              <circle cx="18" cy="18" r="12" fill="none" stroke="var(--color-secondary-100)" strokeWidth="6" />
+              <circle
+                cx="18"
+                cy="18"
+                r="12"
+                fill="none"
+                stroke="var(--color-primary-500)"
+                strokeWidth="6"
+                strokeLinecap="round"
+                pathLength="100"
+                strokeDasharray={`${chartPercentA} 100`}
+              />
+            </svg>
+          ) : null}
+        </div>
         <div className="flex flex-col gap-1">
           <p className="text-body5 text-gray-900">{title}</p>
           <div className="flex flex-col gap-1 text-body7 text-gray-500 md:flex-row md:items-center md:gap-3">
